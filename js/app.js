@@ -471,7 +471,7 @@ async function loadToday() {
     let html = '<span class="today-time">' + fmtTime(e.time) + '</span>' +
       '<span class="today-kind">' + e.kind + "</span>" + escapeHtml(e.main);
     if (e.queued) html += '<span class="pill-queued">queued</span>';
-    if (e.note) html += '<div class="today-note">' + escapeHtml(e.note) + "</div>";
+    if (e.note) html += '<div class="today-note-wrap"><div class="today-note">' + escapeHtml(e.note) + "</div></div>";
     li.innerHTML = html;
     list.appendChild(li);
     const noteEl = li.querySelector(".today-note");
@@ -480,13 +480,20 @@ async function loadToday() {
   empty.hidden = entries.length > 0;
 }
 
-// long notes clamp after 3 lines with a fade; tap to expand, tap again to
-// collapse. short notes show fully, no fade, no tap target. the section
-// re-renders when opened, so measurement happens while it's visible.
+// long notes clamp after 3 lines with a fade and a little chevron handle
+// (points down = tap to expand, flips up when expanded); tap the note to
+// expand, tap again to collapse. short notes show fully, no fade, no handle,
+// no tap target. the section re-renders when opened, so measurement happens
+// while it's visible.
 function clampNote(el) {
   const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
   if (el.scrollHeight > lh * 3 + 2) {
     el.classList.add("clamped");
+    const handle = document.createElement("span");
+    handle.className = "note-handle";
+    handle.setAttribute("aria-hidden", "true");
+    handle.textContent = "\u2304";
+    el.parentElement.appendChild(handle);
     el.addEventListener("click", function () { el.classList.toggle("expanded"); });
   }
 }
