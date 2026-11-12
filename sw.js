@@ -2,13 +2,14 @@
 // the apps script backend is never cached: log posts always go to the
 // network, and if they fail the offline queue in api.js holds the entry.
 
-const CACHE = "health-log-v1";
+const CACHE = "health-log-v2";
 const SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./js/api.js",
   "./js/app.js",
+  "./js/dashboard.js",
   "./manifest.json",
   "./assets/bristol.webp",
   "./assets/icon-192.png",

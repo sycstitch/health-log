@@ -1,6 +1,6 @@
 # health log
 
-my standalone health log — mood, pain, meds, br, food, vitals, sleep, period — as an installable web app that writes straight into my health tracker google sheet. no server, no build step, no npm. just html/css/js.
+my standalone health log — mood, pain, meds, br, food, vitals, sleep, period — as an installable web app that writes straight into my health tracker google sheet. no server, no build step, no npm. just html/css/js. two tabs: tracking (log everything) and dashboard (insights from the last few weeks).
 
 ## how it works
 
@@ -15,6 +15,13 @@ my standalone health log — mood, pain, meds, br, food, vitals, sleep, period �
 2. set the script timezone to America/Chicago (project settings, the gear icon) so "today" and the datetimes match my sheet.
 3. deploy → new deployment → web app. execute as: me. who has access: anyone. copy the web app url — it looks like `https://script.google.com/macros/s/.../exec`.
 4. open the app, paste the url on the setup screen. done — it stays on that device.
+
+## updating the apps script (when Code.gs changes)
+
+the app and the script have to stay in step — new app features that need a new backend action won't work until the script is updated. the url stays the same:
+
+1. open the project at [script.google.com](https://script.google.com), replace the whole file with the new `backend/Code.gs`.
+2. deploy → manage deployments → pencil icon on the web app deployment → version: new version → deploy. same url, no need to re-paste anything in the app.
 
 ## deploying the app (github pages)
 
@@ -33,6 +40,8 @@ if a log can't reach google (no signal, whatever), it goes into a queue in local
 - the meds early / on time / late marker (against 7pm) is display-only in the app — it doesn't go in the sheet, same as the rows already there. and there is no "missed" button, ever.
 - vitals: heart rate can be logged on its own, but systolic and diastolic have to go together.
 - in the br section, nothing logs until i hit the one submit button — a whole trip lands as one row.
+- the dashboard tab pulls the last 45 days from the sheet and computes everything in the browser: mood/sleep/pain/stress summaries, meds streak, water totals, cycle day, plus two early-hint relationships (stress vs mood, sleep vs next-day pain). every card says so when there isn't enough data yet — nothing is made up.
+- water has quick buttons (4 / 8 / 16 oz) plus a custom amount. tampon sizes sit right below the flow buttons, all five on one row, tap-to-log like before.
 - the period tab is date / flow / symptoms / cycle day / notes / cycle start? — cycle day + cycle start are prefilled formulas, so the backend writes around them (date, flow, symptoms, then notes) and never touches them. period rows are date-only, no time, so the cycle math stays exact.
 - dates: the app sends local datetimes and the backend stores them as real date values in the sheet. if the script timezone isn't America/Chicago, "today" in the history list can be off by a day.
 

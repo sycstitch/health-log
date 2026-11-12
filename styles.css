@@ -43,15 +43,10 @@ h3 {
 h3:first-child { margin-top: 0; }
 
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: rgba(23, 24, 26, 0.96);
-  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 1rem 0.6rem;
 }
 .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
 
@@ -78,6 +73,31 @@ main {
 }
 
 #settings-panel { max-width: 560px; margin: 0.75rem auto; }
+
+/* sticky header: topbar + tab bar stick together */
+.sticky-head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(23, 24, 26, 0.96);
+  border-bottom: 1px solid var(--line);
+}
+.tabs { display: flex; }
+.tab {
+  flex: 1;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--muted);
+  padding: 0.5rem 0.5rem 0.6rem;
+  font-size: 0.95rem;
+}
+.tab.on {
+  color: var(--text);
+  border-bottom-color: var(--forest-soft);
+  font-weight: 600;
+}
 
 /* collapsible sections */
 .section-head {
@@ -133,20 +153,80 @@ button.primary:disabled { background: var(--card-2); border-color: var(--line); 
   color: #17181a;
   font-weight: 600;
 }
+/* resting chips are tinted too, not just the selected one.
+   selected = full-strength fill; resting = softer tint. swatch chips
+   (pee / poop / flow / tampon) get a light ring when selected. */
 /* mood buttons: green -> red */
+.mood-row .chip[data-mood="Great"] { background: rgba(74, 124, 89, 0.35); border-color: rgba(74, 124, 89, 0.65); }
+.mood-row .chip[data-mood="Fine"] { background: rgba(127, 160, 127, 0.3); border-color: rgba(127, 160, 127, 0.6); }
+.mood-row .chip[data-mood="Meh"] { background: rgba(217, 164, 65, 0.3); border-color: rgba(217, 164, 65, 0.6); }
+.mood-row .chip[data-mood="Rough"] { background: rgba(201, 123, 74, 0.32); border-color: rgba(201, 123, 74, 0.65); }
+.mood-row .chip[data-mood="Bad"] { background: rgba(176, 74, 74, 0.35); border-color: rgba(176, 74, 74, 0.65); }
 .mood-row .chip[data-mood="Great"].on { background: var(--forest); border-color: var(--forest); color: #f2f5f1; }
 .mood-row .chip[data-mood="Fine"].on { background: #7fa07f; border-color: #7fa07f; color: #17181a; }
 .mood-row .chip[data-mood="Meh"].on { background: var(--amber); border-color: var(--amber); color: #17181a; }
 .mood-row .chip[data-mood="Rough"].on { background: var(--orange); border-color: var(--orange); color: #17181a; }
 .mood-row .chip[data-mood="Bad"].on { background: var(--red); border-color: var(--red); color: #f2f5f1; }
 /* severity: the worse it is, the warmer the chip */
+.severity-row .chip[data-severity="Background noise"] { background: rgba(156, 175, 155, 0.28); border-color: rgba(156, 175, 155, 0.6); }
+.severity-row .chip[data-severity="Bugging me"] { background: rgba(184, 168, 148, 0.3); border-color: rgba(184, 168, 148, 0.6); }
+.severity-row .chip[data-severity="Getting in the way"] { background: rgba(217, 164, 65, 0.3); border-color: rgba(217, 164, 65, 0.6); }
+.severity-row .chip[data-severity="Shut me down"] { background: rgba(176, 74, 74, 0.35); border-color: rgba(176, 74, 74, 0.65); }
 .severity-row .chip[data-severity="Background noise"].on { background: var(--sage); border-color: var(--sage); color: #17181a; }
 .severity-row .chip[data-severity="Bugging me"].on { background: var(--taupe); border-color: var(--taupe); color: #17181a; }
 .severity-row .chip[data-severity="Getting in the way"].on { background: var(--amber); border-color: var(--amber); color: #17181a; }
 .severity-row .chip[data-severity="Shut me down"].on { background: var(--red); border-color: var(--red); color: #f2f5f1; }
+/* sleep quality: same idea, subtler */
+.sleep-row .chip[data-sleep="Good"] { background: rgba(74, 124, 89, 0.3); border-color: rgba(74, 124, 89, 0.6); }
+.sleep-row .chip[data-sleep="Okay"] { background: rgba(217, 164, 65, 0.28); border-color: rgba(217, 164, 65, 0.55); }
+.sleep-row .chip[data-sleep="Bad"] { background: rgba(176, 74, 74, 0.32); border-color: rgba(176, 74, 74, 0.6); }
+.sleep-row .chip[data-sleep="Good"].on { background: var(--forest); border-color: var(--forest); color: #f2f5f1; }
+.sleep-row .chip[data-sleep="Okay"].on { background: var(--amber); border-color: var(--amber); color: #17181a; }
+.sleep-row .chip[data-sleep="Bad"].on { background: var(--red); border-color: var(--red); color: #f2f5f1; }
+/* pee: real swatches, dark text on the light ones */
+.chip.pee-pale { background: #f0e8a6; border-color: #ddd28a; color: #3a3410; }
+.chip.pee-light { background: #f2dd6b; border-color: #d9c44e; color: #3a3410; }
+.chip.pee-dark { background: #d9a92c; border-color: #bd9020; color: #2e2408; }
+.chip.pee-amber { background: #c07f1e; border-color: #a56d16; color: #241a05; }
+.chip.pee-pale.on { background: #e6d87f; }
+.chip.pee-light.on { background: #e3cb2f; }
+.chip.pee-dark.on { background: #c79a1f; }
+.chip.pee-amber.on { background: #a96f14; color: #f2f5f1; }
 /* pee: clear is red — a flag to slow down on water */
-.chip.danger { border-color: var(--red); color: #e8a0a0; }
+.chip.danger { background: rgba(176, 74, 74, 0.25); border-color: var(--red); color: #e8a0a0; }
 .chip.danger.on { background: var(--red); border-color: var(--red); color: #f2f5f1; }
+/* poop colors */
+.chip.poop-brown { background: #8a5a3b; border-color: #74482c; color: #f7ead9; }
+.chip.poop-green { background: #6d8f5a; border-color: #59763f; color: #f2f5f1; }
+.chip.poop-brown.on { background: #6f452b; }
+.chip.poop-green.on { background: #557040; }
+/* flow: light pink -> deeper red */
+.flow-row .chip[data-flow="Spotting"] { background: #eec3cd; border-color: #d9a2b1; color: #3a1f28; }
+.flow-row .chip[data-flow="Light"] { background: #e59db0; border-color: #cf8296; color: #3a1f28; }
+.flow-row .chip[data-flow="Medium"] { background: #cf6b84; border-color: #b8546c; color: #2e1420; }
+.flow-row .chip[data-flow="Heavy"] { background: #b03a54; border-color: #962c44; color: #f2f5f1; }
+.flow-row .chip[data-flow="Spotting"].on { background: #e2a3b4; }
+.flow-row .chip[data-flow="Light"].on { background: #d67f97; }
+.flow-row .chip[data-flow="Medium"].on { background: #bd5570; color: #f2f5f1; }
+.flow-row .chip[data-flow="Heavy"].on { background: #962c44; }
+/* tampons: tampax pearl-ish — light pink, regular blue, super green, super+ purple, ultra orange */
+.chip.tamp-light { background: #f3c1cd; border-color: #dda3b2; color: #3a1f28; }
+.chip.tamp-regular { background: #8fc3e8; border-color: #74abd6; color: #12283a; }
+.chip.tamp-super { background: #8fbf7f; border-color: #76a867; color: #1d2f18; }
+.chip.tamp-superplus { background: #c3a6dd; border-color: #ac8cc9; color: #2b1a38; }
+.chip.tamp-ultra { background: #f0b27a; border-color: #dd9a5c; color: #3a2410; }
+.chip.tamp-light.on { background: #ee9fb0; }
+.chip.tamp-regular.on { background: #6aa9d8; }
+.chip.tamp-super.on { background: #74ad63; }
+.chip.tamp-superplus.on { background: #ab8cc9; }
+.chip.tamp-ultra.on { background: #e89a52; }
+/* swatch chips: a light ring marks the selected one */
+.chip.pee-pale.on, .chip.pee-light.on, .chip.pee-dark.on, .chip.pee-amber.on,
+.chip.poop-brown.on, .chip.poop-green.on,
+.flow-row .chip.on,
+.chip.tamp-light.on, .chip.tamp-regular.on, .chip.tamp-super.on, .chip.tamp-superplus.on, .chip.tamp-ultra.on {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px rgba(232, 230, 225, 0.6);
+}
 /* blood toggle */
 .chip.blood.on { background: var(--red); border-color: var(--red); color: #f2f5f1; }
 /* bristol numbers sit under the sketch */
@@ -156,8 +236,26 @@ button.primary:disabled { background: var(--card-2); border-color: var(--line); 
   width: 100%;
   height: auto;
   margin: 0.6rem 0 0.2rem;
-  border-radius: 8px;
+  background: transparent;
+  border: none;
 }
+
+/* tampon sizes: one row, no wrapping, compact chips */
+.tampon-row { flex-wrap: nowrap; gap: 0.35rem; }
+.tampon-row .chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.35rem 0.2rem;
+  font-size: 0.78rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* water quick buttons + custom amount, one compact row */
+.water-row { display: flex; gap: 0.4rem; align-items: stretch; margin-top: 0.4rem; }
+.water-row .water-btn { flex: 1 1 0; padding: 0.5rem 0.2rem; text-align: center; }
+#water-custom { flex: 0 0 4.2rem; width: 4.2rem; margin-bottom: 0; padding: 0.5rem 0.4rem; text-align: center; }
+#water-custom-btn { flex: 0 0 auto; }
 
 /* inputs */
 .field-label { display: block; font-size: 0.85rem; color: var(--muted); margin: 0.7rem 0 0.3rem; }
@@ -211,6 +309,26 @@ code { font-size: 0.85em; color: var(--sage); word-break: break-all; }
   vertical-align: middle;
 }
 .today-note { color: var(--muted); font-size: 0.85rem; }
+.today-note.clamped:not(.expanded) {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.today-note.clamped:not(.expanded)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.4em;
+  background: linear-gradient(to bottom, transparent, var(--card));
+  pointer-events: none;
+}
+.today-note.clamped.expanded { cursor: pointer; }
 .pill-queued {
   font-size: 0.75rem;
   color: var(--amber);
@@ -220,6 +338,14 @@ code { font-size: 0.85em; color: var(--sage); word-break: break-all; }
   margin-left: 0.3rem;
   vertical-align: middle;
 }
+
+/* dashboard */
+.dash-refresh-row { align-items: center; margin-bottom: 0.5rem; }
+.dash-refresh-row .hint { margin: 0; }
+.stat { margin: 0.25rem 0; font-size: 0.95rem; }
+.stat .big { font-weight: 600; font-size: 1.05rem; }
+.dash-sub { color: var(--muted); font-size: 0.85rem; margin: 0.2rem 0; }
+.dash-empty { color: var(--muted); font-size: 0.9rem; margin: 0.25rem 0; }
 
 /* setup overlay */
 .overlay {

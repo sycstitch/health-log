@@ -13,6 +13,7 @@
 </head>
 <body>
 
+<div class="sticky-head">
 <header class="topbar">
   <h1>health log</h1>
   <div class="topbar-right">
@@ -20,6 +21,11 @@
     <button id="settings-btn" type="button" class="text-btn">settings</button>
   </div>
 </header>
+<nav class="tabs" role="tablist" aria-label="views">
+  <button id="tab-tracking" type="button" role="tab" aria-selected="true" aria-controls="view-tracking" class="tab on">tracking</button>
+  <button id="tab-dashboard" type="button" role="tab" aria-selected="false" aria-controls="view-dashboard" class="tab">dashboard</button>
+</nav>
+</div>
 
 <!-- first-run setup: shown until an apps script url is saved on this device -->
 <div id="setup-screen" class="overlay" hidden>
@@ -51,6 +57,8 @@
 </section>
 
 <main id="app">
+
+<div id="view-tracking" class="view" role="tabpanel" aria-labelledby="tab-tracking">
 
   <section class="card when-card">
     <label class="field-label" for="when">when</label>
@@ -145,9 +153,14 @@
       <input id="food-portion" type="text" placeholder="how much? (optional)" autocomplete="off">
       <label class="field-label" for="food-notes">notes</label>
       <textarea id="food-notes" rows="2" placeholder="anything else?"></textarea>
-      <div class="row">
-        <button id="food-submit" type="button" class="primary" disabled>log food</button>
-        <button id="water-btn" type="button">water 8 oz</button>
+      <button id="food-submit" type="button" class="primary" disabled>log food</button>
+      <h3>water</h3>
+      <div class="water-row">
+        <button type="button" class="water-btn" data-oz="4">4 oz</button>
+        <button type="button" class="water-btn" data-oz="8">8 oz</button>
+        <button type="button" class="water-btn" data-oz="16">16 oz</button>
+        <input id="water-custom" type="number" inputmode="decimal" min="1" placeholder="custom" autocomplete="off" aria-label="custom water amount in oz">
+        <button id="water-custom-btn" type="button">log</button>
       </div>
     </div>
   </section>
@@ -191,7 +204,7 @@
       <label class="field-label" for="wakeups">wake-ups</label>
       <textarea id="wakeups" rows="2" placeholder="when did you wake up in the middle of the night?"></textarea>
       <h3>sleep quality</h3>
-      <div id="sleep-quality" class="chip-row"></div>
+      <div id="sleep-quality" class="chip-row sleep-row"></div>
       <label class="field-label" for="sleep-notes">notes</label>
       <textarea id="sleep-notes" rows="2" placeholder="dreams, nightmares, anything else?"></textarea>
       <button id="sleep-submit" type="button" class="primary" disabled>log sleep</button>
@@ -205,13 +218,12 @@
       <label class="field-label" for="period-date">date</label>
       <input type="date" id="period-date">
       <h3>flow</h3>
-      <div id="flow-btns" class="chip-row"></div>
+      <div id="flow-btns" class="chip-row flow-row"></div>
+      <h3>tampon</h3>
+      <div id="tampon-btns" class="chip-row tampon-row"></div>
       <label class="field-label" for="period-notes">notes</label>
       <textarea id="period-notes" rows="2" placeholder="symptoms, anything else?"></textarea>
       <button id="period-submit" type="button" class="primary" disabled>log period</button>
-      <h3>tampon</h3>
-      <p class="hint">tap one to log it right now, with the time.</p>
-      <div id="tampon-btns" class="chip-row"></div>
     </div>
   </section>
 
@@ -228,11 +240,65 @@
     </div>
   </section>
 
+</div>
+
+<div id="view-dashboard" class="view" role="tabpanel" aria-labelledby="tab-dashboard" hidden>
+
+  <div class="row dash-refresh-row">
+    <p class="hint" id="dash-updated">dashboard pulls from the sheet.</p>
+    <button id="dash-refresh" type="button">refresh</button>
+  </div>
+  <p id="dash-loading" class="hint" hidden>pulling your last few weeks...</p>
+  <p id="dash-error" class="error" hidden></p>
+
+  <section class="card dash-card">
+    <h3>mood · last 7 days</h3>
+    <div id="dash-mood"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>sleep · last 7 days</h3>
+    <div id="dash-sleep"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>pain · last 7 days</h3>
+    <div id="dash-pain"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>meds</h3>
+    <div id="dash-meds"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>water</h3>
+    <div id="dash-water"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>stress · last 7 days</h3>
+    <div id="dash-stress"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>period</h3>
+    <div id="dash-period"></div>
+  </section>
+
+  <section class="card dash-card">
+    <h3>connections · early hints, not conclusions</h3>
+    <div id="dash-links"></div>
+  </section>
+
+</div>
+
 </main>
 
 <div id="toast" class="toast" hidden></div>
 
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
+<script src="js/dashboard.js"></script>
 </body>
 </html>
