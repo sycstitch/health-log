@@ -209,17 +209,17 @@ button.primary:disabled { background: var(--card-2); border-color: var(--line); 
 .flow-row .chip[data-flow="Light"].on { background: #d67f97; }
 .flow-row .chip[data-flow="Medium"].on { background: #bd5570; color: #f2f5f1; }
 .flow-row .chip[data-flow="Heavy"].on { background: #962c44; }
-/* tampons: tampax pearl-ish — light pink, regular blue, super green, super+ purple, ultra orange */
-.chip.tamp-light { background: #f3c1cd; border-color: #dda3b2; color: #3a1f28; }
-.chip.tamp-regular { background: #8fc3e8; border-color: #74abd6; color: #12283a; }
+/* tampons: tampax pearl, her colors (2026-11-12) — light purple, regular yellow, super green, super+ orange, ultra dark purple */
+.chip.tamp-light { background: #dcc8f0; border-color: #c6a9e3; color: #2b1a38; }
+.chip.tamp-regular { background: #f5e07a; border-color: #d9c44e; color: #3a3410; }
 .chip.tamp-super { background: #8fbf7f; border-color: #76a867; color: #1d2f18; }
-.chip.tamp-superplus { background: #c3a6dd; border-color: #ac8cc9; color: #2b1a38; }
-.chip.tamp-ultra { background: #f0b27a; border-color: #dd9a5c; color: #3a2410; }
-.chip.tamp-light.on { background: #ee9fb0; }
-.chip.tamp-regular.on { background: #6aa9d8; }
+.chip.tamp-superplus { background: #f0b27a; border-color: #dd9a5c; color: #3a2410; }
+.chip.tamp-ultra { background: #7b5ea7; border-color: #654d8a; color: #f2f5f1; }
+.chip.tamp-light.on { background: #c9a9e6; }
+.chip.tamp-regular.on { background: #ecd24a; }
 .chip.tamp-super.on { background: #74ad63; }
-.chip.tamp-superplus.on { background: #ab8cc9; }
-.chip.tamp-ultra.on { background: #e89a52; }
+.chip.tamp-superplus.on { background: #e89a52; }
+.chip.tamp-ultra.on { background: #654d8a; }
 /* swatch chips: a light ring marks the selected one */
 .chip.pee-pale.on, .chip.pee-light.on, .chip.pee-dark.on, .chip.pee-amber.on,
 .chip.poop-brown.on, .chip.poop-green.on,
