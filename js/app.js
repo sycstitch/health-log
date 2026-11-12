@@ -98,12 +98,17 @@ const sevG = chipGroup($("severity-btns"), SEVERITIES, false);
 $("severity-btns").querySelectorAll(".chip").forEach(function (c, i) { c.dataset.severity = SEVERITIES[i]; });
 const concG = chipGroup($("concussion-chips"), CONCUSSION, true);
 const medsG = chipGroup($("meds-chips"), MEDS, true);
-const peeG = chipGroup($("pee-chips"), PEE_COLORS, false, function (c) { return c === "Clear" ? "danger" : ""; });
-const poopG = chipGroup($("poop-chips"), POOP_COLORS, true);
+const PEE_CLASSES = { "Pale yellow": "pee-pale", "Light yellow": "pee-light", "Dark yellow": "pee-dark", "Amber": "pee-amber", "Clear": "danger" };
+const peeG = chipGroup($("pee-chips"), PEE_COLORS, false, function (c) { return PEE_CLASSES[c] || ""; });
+const POOP_CLASSES = { "Brown": "poop-brown", "Green": "poop-green" };
+const poopG = chipGroup($("poop-chips"), POOP_COLORS, true, function (c) { return POOP_CLASSES[c] || ""; });
 const bristolG = chipGroup($("bristol-btns"), BRISTOL, true);
 const sleepQG = chipGroup($("sleep-quality"), SLEEP_QUALITY, false);
+$("sleep-quality").querySelectorAll(".chip").forEach(function (c, i) { c.dataset.sleep = SLEEP_QUALITY[i]; });
 const flowG = chipGroup($("flow-btns"), FLOW, false);
-const tamponG = chipGroup($("tampon-btns"), TAMPONS, false);
+$("flow-btns").querySelectorAll(".chip").forEach(function (c, i) { c.dataset.flow = FLOW[i]; });
+const TAMPON_CLASSES = { "light": "tamp-light", "regular": "tamp-regular", "super": "tamp-super", "super+": "tamp-superplus", "ultra": "tamp-ultra" };
+const tamponG = chipGroup($("tampon-btns"), TAMPONS, false, function (t) { return TAMPON_CLASSES[t] || ""; });
 
 // blood is its own toggle (not part of a group)
 let bloodPicked = false;
@@ -324,8 +329,21 @@ $("food-submit").addEventListener("click", function () {
     $("food-name").value = ""; $("food-portion").value = ""; $("food-notes").value = "";
   });
 });
-$("water-btn").addEventListener("click", function () {
-  submitLog("Food Log", [getWhen(), "Drink", "water", "8 oz", ""], "water 8 oz", null);
+function logWater(oz) {
+  var label = oz + " oz";
+  submitLog("Food Log", [getWhen(), "Drink", "water", label, ""], "water " + label, null);
+}
+document.querySelectorAll(".water-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () { logWater(btn.dataset.oz); });
+});
+$("water-custom-btn").addEventListener("click", function () {
+  var v = parseFloat($("water-custom").value);
+  if (!v || v <= 0) { toast("how much water? put a number in first :)"); return; }
+  logWater((Math.round(v * 10) / 10).toString());
+  $("water-custom").value = "";
+});
+$("water-custom").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") $("water-custom-btn").click();
 });
 
 // ---------- vitals ----------
@@ -456,8 +474,21 @@ async function loadToday() {
     if (e.note) html += '<div class="today-note">' + escapeHtml(e.note) + "</div>";
     li.innerHTML = html;
     list.appendChild(li);
+    const noteEl = li.querySelector(".today-note");
+    if (noteEl) clampNote(noteEl);
   });
   empty.hidden = entries.length > 0;
+}
+
+// long notes clamp after 3 lines with a fade; tap to expand, tap again to
+// collapse. short notes show fully, no fade, no tap target. the section
+// re-renders when opened, so measurement happens while it's visible.
+function clampNote(el) {
+  const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
+  if (el.scrollHeight > lh * 3 + 2) {
+    el.classList.add("clamped");
+    el.addEventListener("click", function () { el.classList.toggle("expanded"); });
+  }
 }
 
 function escapeHtml(s) {

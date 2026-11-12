@@ -110,6 +110,14 @@ async function fetchToday(tab) {
   return (data && data.rows) || [];
 }
 
+// dashboard bundle: recent rows for every tab, in one round trip.
+// {days, fetchedAt, tabs: {"Mood Log": [[...]], ...}} — dates come back
+// as ISO strings, same as fetchToday.
+async function fetchDashboard(days) {
+  if (!isConfigured()) throw new Error("not-configured");
+  return await postToBackend({ action: "dashboard", days: days || 45 });
+}
+
 window.addEventListener("online", flushQueue);
 document.addEventListener("visibilitychange", function () {
   if (!document.hidden) flushQueue();
