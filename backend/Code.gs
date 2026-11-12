@@ -18,6 +18,11 @@
  *        -> {row: N, tab} — appends one row, returns the row it landed on
  *   POST {action:"today", tab:"Mood Log"}
  *        -> {tab, rows:[{row, values}]} — today's rows, for the history list
+ *   POST {action:"dashboard", days:45}
+ *        -> {days, fetchedAt, tabs: {"Mood Log": [[...]], ...}} — recent
+ *           rows for every tab the dashboard needs, in one round trip.
+ *           dates serialize as ISO strings. Period Log always returns its
+ *           last 90 rows (cycle math needs more than the day window).
  */
 
 var SHEET_ID = "1N-7mGhUGKBb5OjkgBHWlhDWnDROJdwAMzYCSbVOqAC8";
@@ -33,6 +38,7 @@ function doPost(e) {
     var req = JSON.parse(e.postData.contents);
     if (req.action === "append") return jsonOut(append_(req));
     if (req.action === "today") return jsonOut(today_(req));
+    if (req.action === "dashboard") return jsonOut(dashboard_(req));
     return jsonOut({ error: "unknown action: " + req.action });
   } catch (err) {
     return jsonOut({ error: String(err) });
@@ -127,4 +133,51 @@ function today_(req) {
     rows.push({ row: i + 2, values: data[i] });
   }
   return { tab: req.tab, rows: rows };
+}
+
+var DASH_TABS = ["Mood Log", "Pain Log", "Food Log", "Vitals", "Sleep Log", "Period Log", "Stress Log"];
+
+// One bundle for the dashboard tab: recent rows for every tab it needs.
+// All math happens client-side; this just ships the rows. Dates come back
+// as ISO strings (JSON.stringify on a Date). Period Log returns its last
+// 90 rows regardless of the day window — cycle math needs the last START,
+// which can be further back than the window.
+function dashboard_(req) {
+  var days = req.days || 14;
+  if (days < 1) days = 1;
+  if (days > 90) days = 90;
+  var tz = Session.getScriptTimeZone();
+  var now = new Date();
+  var cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+  var cutoffStr = Utilities.formatDate(cutoff, tz, "yyyy-MM-dd");
+  var out = {};
+  DASH_TABS.forEach(function (tab) {
+    var sh = SpreadsheetApp.openById(SHEET_ID).getSheetByName(tab);
+    if (!sh) { out[tab] = []; return; }
+    var last = lastDataRow_(sh);
+    if (last < 2) { out[tab] = []; return; }
+    var data = sh.getRange(2, 1, last - 1, sh.getLastColumn()).getValues();
+    var rows = [];
+    for (var i = 0; i < data.length; i++) {
+      if (tab === "Period Log") {
+        rows.push(data[i]);
+        continue;
+      }
+      var day = dayStr_(data[i][0], tz);
+      if (day && day >= cutoffStr) rows.push(data[i]);
+    }
+    if (tab === "Period Log" && rows.length > 90) rows = rows.slice(rows.length - 90);
+    out[tab] = rows;
+  });
+  return { days: days, fetchedAt: new Date().toISOString(), tabs: out };
+}
+
+// A cell value -> "yyyy-MM-dd" in the script timezone, or null.
+function dayStr_(d, tz) {
+  if (d instanceof Date) return Utilities.formatDate(d, tz, "yyyy-MM-dd");
+  if (typeof d === "string" && d !== "") {
+    var parsed = new Date(d);
+    if (!isNaN(parsed.getTime())) return Utilities.formatDate(parsed, tz, "yyyy-MM-dd");
+  }
+  return null;
 }
