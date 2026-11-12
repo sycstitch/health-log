@@ -309,6 +309,20 @@ code { font-size: 0.85em; color: var(--sage); word-break: break-all; }
   vertical-align: middle;
 }
 .today-note { color: var(--muted); font-size: 0.85rem; }
+.today-note-wrap { position: relative; }
+/* little chevron at the bottom-right of a clamped note: it only exists when
+   the note actually overflows. taps pass through it to the note itself. */
+.note-handle {
+  position: absolute;
+  right: 0.1rem;
+  bottom: 0.1rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  pointer-events: none;
+  transition: transform 0.15s;
+}
+.today-note.expanded + .note-handle { transform: rotate(180deg); }
 .today-note.clamped:not(.expanded) {
   display: -webkit-box;
   -webkit-line-clamp: 3;
