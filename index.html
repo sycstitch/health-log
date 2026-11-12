@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>health log</title>
+<meta name="theme-color" content="#17181a">
+<meta name="description" content="my personal health log — mood, pain, meds, food, sleep, all straight into my google sheet.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>health log</h1>
+  <div class="topbar-right">
+    <span id="queue-indicator" class="queue" hidden><span id="queue-count">0</span> queued</span>
+    <button id="settings-btn" type="button" class="text-btn">settings</button>
+  </div>
+</header>
+
+<!-- first-run setup: shown until an apps script url is saved on this device -->
+<div id="setup-screen" class="overlay" hidden>
+  <div class="overlay-card">
+    <h2>hey, let's get set up</h2>
+    <p>paste your apps script url to get started. it stays on this device only — it's never in the code, and it never goes anywhere except google.</p>
+    <p class="hint">it's the web app url from script.google.com — looks like <code>https://script.google.com/macros/s/.../exec</code></p>
+    <label class="field-label" for="setup-url">apps script url</label>
+    <input id="setup-url" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+           placeholder="https://script.google.com/macros/s/.../exec">
+    <p id="setup-error" class="error" hidden>that doesn't look like an apps script web app url — it should start with https://script.google.com/macros/s/ and end with /exec</p>
+    <button id="setup-save" type="button" class="primary">save + start logging</button>
+  </div>
+</div>
+
+<!-- settings: view / change the stored url -->
+<section id="settings-panel" class="card" hidden>
+  <h2>settings</h2>
+  <p class="hint">the apps script url is the key that lets this app write to my sheet. it's stored in this browser only.</p>
+  <label class="field-label" for="settings-url">apps script url</label>
+  <input id="settings-url" type="url" inputmode="url" autocomplete="off" spellcheck="false">
+  <p id="settings-error" class="error" hidden>that doesn't look like an apps script web app url — it should start with https://script.google.com/macros/s/ and end with /exec</p>
+  <div class="row">
+    <button id="settings-save" type="button" class="primary">save url</button>
+    <button id="settings-clear" type="button">remove url</button>
+    <button id="settings-close" type="button">close</button>
+  </div>
+  <p id="settings-status" class="hint"></p>
+</section>
+
+<main id="app">
+
+  <section class="card when-card">
+    <label class="field-label" for="when">when</label>
+    <div class="row">
+      <input id="when" type="datetime-local">
+      <button id="now-btn" type="button">now</button>
+    </div>
+    <p class="hint">this time is used for every log below (except sleep + period, which have their own dates). it follows the clock until you pick a time yourself.</p>
+  </section>
+
+  <!-- mood: open by default -->
+  <section class="card collapsible open" data-section="mood">
+    <button type="button" class="section-head">mood <span class="chevron" aria-hidden="true">–</span></button>
+    <div class="section-body">
+      <div id="mood-btns" class="chip-row mood-row"></div>
+      <h3>what's going on</h3>
+      <div id="dep-chips" class="chip-row"></div>
+      <div id="anx-chips" class="chip-row"></div>
+      <h3>restlessness</h3>
+      <div id="restless-chips" class="chip-row"></div>
+      <h3>libido</h3>
+      <div id="libido-chips" class="chip-row"></div>
+      <label class="field-label" for="mood-notes">notes</label>
+      <textarea id="mood-notes" rows="2" placeholder="anything else?"></textarea>
+      <button id="mood-submit" type="button" class="primary" disabled>log mood</button>
+    </div>
+  </section>
+
+  <!-- pain -->
+  <section class="card collapsible" data-section="pain">
+    <button type="button" class="section-head">pain <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <h3>where</h3>
+      <div id="body-chips" class="chip-row"></div>
+      <input id="body-other" type="text" placeholder="other body part (optional)" autocomplete="off">
+      <h3>what kind</h3>
+      <div id="type-chips" class="chip-row"></div>
+      <h3>how bad</h3>
+      <div id="severity-btns" class="chip-row severity-row"></div>
+      <h3>concussion stuff</h3>
+      <div id="concussion-chips" class="chip-row"></div>
+      <label class="field-label" for="pain-doing">doing when it started</label>
+      <input id="pain-doing" type="text" placeholder="sitting, walking, just woke up..." autocomplete="off">
+      <label class="field-label" for="pain-notes">notes</label>
+      <textarea id="pain-notes" rows="2" placeholder="anything else?"></textarea>
+      <button id="pain-submit" type="button" class="primary" disabled>log pain</button>
+    </div>
+  </section>
+
+  <!-- meds -->
+  <section class="card collapsible" data-section="meds">
+    <button type="button" class="section-head">meds <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <div id="meds-chips" class="chip-row"></div>
+      <p id="meds-status" class="hint"></p>
+      <button id="meds-submit" type="button" class="primary" disabled>log meds</button>
+    </div>
+  </section>
+
+  <!-- br: one section, one submit button for the whole trip -->
+  <section class="card collapsible" data-section="br">
+    <button type="button" class="section-head">br <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <h3>pee</h3>
+      <div id="pee-chips" class="chip-row"></div>
+      <h3>poop</h3>
+      <div id="poop-chips" class="chip-row"></div>
+      <img src="assets/bristol.webp" alt="bristol stool scale sketches, types 1 to 7" class="bristol-img">
+      <div id="bristol-btns" class="chip-row bristol-row"></div>
+      <h3>blood</h3>
+      <div class="chip-row"><button id="blood-toggle" type="button" class="chip blood">blood</button></div>
+      <button id="br-submit" type="button" class="primary" disabled>log br</button>
+      <p class="hint">nothing here logs until you hit the button — one trip, one row.</p>
+    </div>
+  </section>
+
+  <!-- food -->
+  <section class="card collapsible" data-section="food">
+    <button type="button" class="section-head">food <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <label class="field-label" for="meal-select">meal</label>
+      <select id="meal-select">
+        <option>Breakfast</option>
+        <option>Lunch</option>
+        <option>Dinner</option>
+        <option>Snack</option>
+        <option>Drink</option>
+      </select>
+      <label class="field-label" for="food-name">food / drink</label>
+      <input id="food-name" type="text" placeholder="what'd you have?" autocomplete="off">
+      <label class="field-label" for="food-portion">portion</label>
+      <input id="food-portion" type="text" placeholder="how much? (optional)" autocomplete="off">
+      <label class="field-label" for="food-notes">notes</label>
+      <textarea id="food-notes" rows="2" placeholder="anything else?"></textarea>
+      <div class="row">
+        <button id="food-submit" type="button" class="primary" disabled>log food</button>
+        <button id="water-btn" type="button">water 8 oz</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- vitals -->
+  <section class="card collapsible" data-section="vitals">
+    <button type="button" class="section-head">vitals <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <div class="vitals-grid">
+        <label class="field-label">systolic (top)
+          <input id="sys" type="number" inputmode="numeric" placeholder="120" autocomplete="off">
+        </label>
+        <label class="field-label">diastolic (bottom)
+          <input id="dia" type="number" inputmode="numeric" placeholder="80" autocomplete="off">
+        </label>
+        <label class="field-label">heart rate (bpm)
+          <input id="hr" type="number" inputmode="numeric" placeholder="72" autocomplete="off">
+        </label>
+      </div>
+      <p id="vitals-hint" class="hint" hidden>systolic + diastolic go together</p>
+      <label class="field-label" for="vitals-notes">notes</label>
+      <textarea id="vitals-notes" rows="2" placeholder="context? (running, anxious, just woke up...)"></textarea>
+      <button id="vitals-submit" type="button" class="primary" disabled>log vitals</button>
+    </div>
+  </section>
+
+  <!-- sleep -->
+  <section class="card collapsible" data-section="sleep">
+    <button type="button" class="section-head">sleep <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <label class="field-label" for="sleep-date">night of</label>
+      <input id="sleep-date" type="date">
+      <div class="row">
+        <label class="field-label">bedtime
+          <input id="bedtime" type="time">
+        </label>
+        <label class="field-label">final wake
+          <input id="final-wake" type="time">
+        </label>
+      </div>
+      <label class="field-label" for="wakeups">wake-ups</label>
+      <textarea id="wakeups" rows="2" placeholder="when did you wake up in the middle of the night?"></textarea>
+      <h3>sleep quality</h3>
+      <div id="sleep-quality" class="chip-row"></div>
+      <label class="field-label" for="sleep-notes">notes</label>
+      <textarea id="sleep-notes" rows="2" placeholder="dreams, nightmares, anything else?"></textarea>
+      <button id="sleep-submit" type="button" class="primary" disabled>log sleep</button>
+    </div>
+  </section>
+
+  <!-- period -->
+  <section class="card collapsible" data-section="period">
+    <button type="button" class="section-head">period <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <label class="field-label" for="period-date">date</label>
+      <input type="date" id="period-date">
+      <h3>flow</h3>
+      <div id="flow-btns" class="chip-row"></div>
+      <label class="field-label" for="period-notes">notes</label>
+      <textarea id="period-notes" rows="2" placeholder="symptoms, anything else?"></textarea>
+      <button id="period-submit" type="button" class="primary" disabled>log period</button>
+      <h3>tampon</h3>
+      <p class="hint">tap one to log it right now, with the time.</p>
+      <div id="tampon-btns" class="chip-row"></div>
+    </div>
+  </section>
+
+  <!-- today -->
+  <section class="card collapsible" data-section="today">
+    <button type="button" class="section-head">today <span class="chevron" aria-hidden="true">+</span></button>
+    <div class="section-body">
+      <div class="row">
+        <button id="today-refresh" type="button">refresh</button>
+      </div>
+      <ul id="today-list" class="today-list"></ul>
+      <p id="today-empty" class="hint" hidden>nothing logged today yet.</p>
+      <p id="today-error" class="error" hidden>couldn't reach the sheet — showing queued entries only.</p>
+    </div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
